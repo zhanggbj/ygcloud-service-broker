@@ -1,0 +1,29 @@
+{
+    "broker_config": {
+        "log_level": "DEBUG",
+        "username": "username",
+        "password": "password"
+    },
+    "back_database": {
+        "database_type": "mysql",
+        "database_host": "127.0.0.1",
+        "database_port": "3306",
+        "database_name": "broker",
+        "database_username": "username",
+        "database_password": "password"
+    },
+    "cloud_credentials": {
+        "auth_url": "https://iam.ap-southeast-1.myhwclouds.com",
+        "user_name": "",
+        "password": "",
+        "domain_name": "",
+        "tenant_name": "ap-southeast-1",
+        "region": "ap-southeast-1",
+        "access_key": "",
+        "secret_key": ""
+    },
+    "catalog": {
+        "services": [
+        ]
+    }
+}
