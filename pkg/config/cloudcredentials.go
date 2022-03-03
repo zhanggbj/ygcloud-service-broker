@@ -17,7 +17,7 @@ type CloudCredentials struct {
 	ClientSet    kubernetes.Interface
 }
 
-func (c *CloudCredentials) Validate() error {
+func (c *CloudCredentials) Initial() error {
 	if c.ClientSet == nil {
 		restConfig, err := c.RestConfig()
 		if err != nil {
@@ -27,7 +27,23 @@ func (c *CloudCredentials) Validate() error {
 		c.ClientSet, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
 			fmt.Println("failed to create client:", err)
-			os.Exit(1)
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *CloudCredentials) Validate() error {
+	if c.ClientSet == nil {
+		restConfig, err := c.RestConfig()
+		if err != nil {
+			return err
+		}
+
+		c.ClientSet, err = kubernetes.NewForConfig(restConfig)
+		if err != nil {
+			fmt.Println("failed to load k8s config:", err)
+			return err
 		}
 	}
 	return nil

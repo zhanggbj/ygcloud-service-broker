@@ -34,3 +34,12 @@ type MetadataParameters struct {
 	SecurityGroupID   string   `json:"security_group_id,omitempty"`
 	AvailabilityZones []string `json:"availability_zones,omitempty"`
 }
+
+const (
+	// AddtionalParamUsername for username
+	AddtionalParamUsername string = "username"
+	// AddtionalParamPassword for password
+	AddtionalParamPassword string = "password"
+	// AddtionalParamRequest for request
+	AddtionalParamRequest string = "request"
+)
