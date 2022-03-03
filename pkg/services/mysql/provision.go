@@ -69,7 +69,7 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 	// Init cloud client
 	err = m.CloudCredentials.Initial()
 	if err != nil {
-		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("create dcs client failed. Error: %s", err)
+		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("create cloud client failed. Error: %s", err)
 	}
 
 	// Find service
@@ -125,12 +125,10 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("Provision failed. Error: %s", err)
 	}
 
-	m.Logger.Debug(fmt.Sprintf("provision parameters%v", provisionParameters))
 	values := "auth:\n" +
 		"  rootPassword: " + provisionParameters.DatabasePassword + "\n" +
 		"  database: " + provisionParameters.Name
 
-	fmt.Printf("DEBUG values %s", values)
 	chartSpec := helmClient.ChartSpec{
 		ReleaseName: fmt.Sprintf("mysql-%s", instanceID),
 		ChartName:   "https://charts.bitnami.com/bitnami/mysql-8.8.26.tgz",
@@ -156,6 +154,18 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("get mysql instance failed. Error: %s", err)
 	}
 
+	// Constuct addtional info
+	addtionalparam := map[string]string{}
+	addtionalparam[AddtionalParamDBUsername] = "root"
+	addtionalparam[AddtionalParamDBPassword] = provisionParameters.DatabasePassword
+	addtionalparam[AddtionalParamDBname] = provisionParameters.Name
+
+	// Marshal addtional info
+	addtionalinfo, err := json.Marshal(addtionalparam)
+	if err != nil {
+		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("marshal rds addtional info failed. Error: %s", err)
+	}
+
 	// create InstanceDetails in back database
 	idsOpts := database.InstanceDetails{
 		ServiceID:      details.ServiceID,
@@ -165,7 +175,7 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 		TargetName:     freshInstance.Name,
 		TargetStatus:   string(freshInstance.Info.Status),
 		TargetInfo:     "fake-target-infor",
-		AdditionalInfo: "fake-additional-info",
+		AdditionalInfo: string(addtionalinfo),
 	}
 
 	// log InstanceDetails opts
@@ -184,5 +194,5 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 
 	dashboardUrl := fmt.Sprintf("http://example.dashboard.com/mysql/%s", instanceID)
 
-	return brokerapi.ProvisionedServiceSpec{IsAsync: true, DashboardURL: dashboardUrl, OperationData: ""}, nil
+	return brokerapi.ProvisionedServiceSpec{IsAsync: true, DashboardURL: dashboardUrl, OperationData: fmt.Sprintf("task_%s", instanceID)}, nil
 }

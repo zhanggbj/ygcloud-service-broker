@@ -2,9 +2,11 @@ package mysql
 
 import (
 	"encoding/json"
+	"fmt"
 
 	"code.cloudfoundry.org/lager"
 	"github.com/zhanggbj/ygcloud-service-broker/pkg/config"
+	"github.com/zhanggbj/ygcloud-service-broker/pkg/models"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -15,13 +17,14 @@ type MySqlBroker struct {
 	Logger           lager.Logger
 }
 
-// BindingCredential represent dcs binding credential
+// BindingCredential represent rds binding credential
 type BindingCredential struct {
-	IP       string `json:"host,omitempty"`
+	Host     string `json:"host,omitempty"`
 	Port     int    `json:"port,omitempty"`
+	Name     string `json:"name,omitempty"`
 	UserName string `json:"username,omitempty"`
 	Password string `json:"password,omitempty"`
-	Name     string `json:"name,omitempty"`
+	URI      string `json:"uri,omitempty"`
 	Type     string `json:"type,omitempty"`
 }
 
@@ -74,10 +77,42 @@ func (f *ProvisionParameters) UnmarshalJSON(b []byte) error {
 }
 
 const (
-	// AddtionalParamUsername for username
-	AddtionalParamUsername string = "username"
-	// AddtionalParamPassword for password
-	AddtionalParamPassword string = "password"
+	// AddtionalParamDBUsername for dbusername
+	AddtionalParamDBUsername string = "dbusername"
+	// AddtionalParamDBPassword for dbpassword
+	AddtionalParamDBPassword string = "dbpassword"
+	// AddtionalParamDBPassword for dbpassword
+	AddtionalParamDBname string = "dbname"
 	// AddtionalParamRequest for request
 	AddtionalParamRequest string = "request"
 )
+
+// BuildBindingCredential from mysql instance
+func BuildBindingCredential(
+	host string,
+	port int,
+	name string,
+	username string,
+	password string,
+	servicetype string) (BindingCredential, error) {
+
+	var uri string
+	if servicetype == models.MysqlServiceName {
+		// Mysql
+		uri = fmt.Sprintf("%s:%s@%s:%d", username, password, host, port)
+	} else {
+		return BindingCredential{}, fmt.Errorf("unknown service type: %s", servicetype)
+	}
+
+	// Init BindingCredential
+	bc := BindingCredential{
+		Host:     host,
+		Port:     port,
+		Name:     name,
+		UserName: username,
+		Password: password,
+		URI:      uri,
+		Type:     servicetype,
+	}
+	return bc, nil
+}
