@@ -271,7 +271,7 @@ func (cloudBroker *CloudServiceBroker) LastOperation(
 
 	cloudBroker.Logger.Debug(fmt.Sprintf("LastOperation received. instanceID: %s", instanceID))
 
-	operationData := "fake"
+	operationData := details.OperationData
 	if operationData != "" {
 		// operationData is existing
 		ods := database.OperationDetails{}
