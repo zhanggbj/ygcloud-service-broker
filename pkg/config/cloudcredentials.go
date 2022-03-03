@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	helmClient "github.com/mittwald/go-helm-client"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -14,7 +15,8 @@ import (
 type CloudCredentials struct {
 	K8sCfgPath   string `json:"K8s_config_path"`
 	ClientConfig clientcmd.ClientConfig
-	ClientSet    kubernetes.Interface
+	ClientSet    helmClient.Client
+	KubeClient   *kubernetes.Clientset
 }
 
 func (c *CloudCredentials) Initial() error {
@@ -24,9 +26,26 @@ func (c *CloudCredentials) Initial() error {
 			return err
 		}
 
-		c.ClientSet, err = kubernetes.NewForConfig(restConfig)
+		c.KubeClient, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
-			fmt.Println("failed to create client:", err)
+			fmt.Println("failed to Kubernetes client:", err)
+			return err
+		}
+
+		opt := &helmClient.RestConfClientOptions{
+			Options: &helmClient.Options{
+				Namespace:        "default",
+				RepositoryCache:  "/tmp/.helmcache",
+				RepositoryConfig: "/tmp/.helmrepo",
+				Debug:            true,
+				Linting:          true,
+				DebugLog:         func(format string, v ...interface{}) {},
+			},
+			RestConfig: restConfig,
+		}
+		c.ClientSet, err = helmClient.NewClientFromRestConf(opt)
+		if err != nil {
+			fmt.Println("failed to create helm client:", err)
 			return err
 		}
 	}
@@ -40,9 +59,9 @@ func (c *CloudCredentials) Validate() error {
 			return err
 		}
 
-		c.ClientSet, err = kubernetes.NewForConfig(restConfig)
+		c.KubeClient, err = kubernetes.NewForConfig(restConfig)
 		if err != nil {
-			fmt.Println("failed to load k8s config:", err)
+			fmt.Println("failed to validate cloud credentials:", err)
 			return err
 		}
 	}
