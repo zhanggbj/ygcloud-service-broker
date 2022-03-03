@@ -16,11 +16,114 @@
         "K8s_config_path": "/Users/zhanggong/.kube/config"
     },
     "catalog": {
-        "services": [{
-          "name": "mysql",
-          "id": "acb56d7c-XXXX-XXXX-XXXX-feb140a59a66",
-          "description": "mysql service based on k8s",
-          "tags": ["mysql", "relational"],
+        "services": [
+          {
+            "id": "275f3e0b-86fd-4303-946c-171374d29150",
+            "name": "mysql",
+            "description": "MySQL Service based on K8s",
+            "bindable": true,
+            "tags": [
+                "mysql",
+                "relational"
+            ],
+            "metadata": {
+                "displayName": "MySQL",
+                "imageUrl": "data:image/png;",
+                "longDescription": "MySQL Service",
+                "providerDisplayName": "YGCloud Services",
+                "documentationUrl": "https://support.example.com.cn/doc.html",
+                "supportUrl": "http://www.example.com.cn/product/mysql.html"
+            },
+            "plan_updateable": true,
+            "plans": [
+                {
+                    "id": "fc1b0ebf-aabf-4ab1-87e9-83544a5902e8",
+                    "name": "mysql",
+                    "description": "MySQL 8.0.28",
+                    "free": false,
+                    "metadata": {
+                        "parameters": {
+                            "datastore_type": "MySQL",
+                            "datastore_version": "8.0.28",
+                            "speccode": "mysql.s1.xlarge",
+                            "volume_type": "COMMON",
+                            "volume_size": 100,
+                            "availability_zone": "cn-north-1a",
+                            "vpc_id": "2c1fe4bd-ebad-44ca-ae9d-e94e63847b75",
+                            "subnet_id": "dc8632e2-d9ff-41b1-aa0c-d455557314a0",
+                            "security_group_id": "c6f05de2-9534-493a-ae83-444792ce9ab5",
+                            "database_username": "root"
+                        },
+                        "costs":[
+                          {
+                             "amount":{
+                                "usd":99.0
+                             },
+                             "unit":"MONTHLY"
+                          },
+                          {
+                             "amount":{
+                                "usd":0.99
+                             },
+                             "unit":"1GB of messages over 20GB"
+                          }
+                       ],
+                      "bullets": [
+                        "Shared fake server",
+                        "5 TB storage",
+                        "40 concurrent connections"
+                      ]
+                    },
+                    "maintenance_info": {
+                      "version": "8.0.28",
+                      "description": "OS image update.\nExpect downtime."
+                    }
+                },
+                {
+                    "id": "839f4458-309a-4e05-a069-807e950cf6da",
+                    "name": "mysql",
+                    "description": "MySQL 5.7.21",
+                    "metadata": {
+                        "parameters": {
+                            "datastore_type": "MySQL",
+                            "datastore_version": "5.7.21",
+                            "speccode": "mysql.s1.xlarge",
+                            "volume_type": "COMMON",
+                            "volume_size": 100,
+                            "availability_zone": "cn-north-1a",
+                            "vpc_id": "2c1fe4bd-ebad-44ca-ae9d-e94e63847b75",
+                            "subnet_id": "dc8632e2-d9ff-41b1-aa0c-d455557314a0",
+                            "security_group_id": "c6f05de2-9534-493a-ae83-444792ce9ab5",
+                            "database_username": "root"
+                        },
+                        "costs":[
+                          {
+                             "amount":{
+                                "usd":99.0
+                             },
+                             "unit":"MONTHLY"
+                          },
+                          {
+                             "amount":{
+                                "usd":0.99
+                             },
+                             "unit":"1GB of messages over 20GB"
+                          }
+                       ],
+                      "bullets": [
+                        "Shared fake server",
+                        "5 TB storage",
+                        "40 concurrent connections"
+                      ]
+                    }
+                }
+            ]
+        },
+          {
+          "name": "redis",
+          "id": "acb56d7c-23d3-1245-as36-feb140a59a66",
+          "description": "redis service based on k8s",
+          "tags": ["redis", "relational"],
           "requires": ["route_forwarding"],
           "bindable": true,
           "instances_retrievable": true,
@@ -35,12 +138,12 @@
               "blurb": "Add a blurb here",
               "longDescription": "A long time ago, in a galaxy far far away..."
             },
-            "displayName": "The Fake Service Broker"
+            "displayName": "YGCloud Service Broker"
           },
           "plan_updateable": true,
           "plans": [{
             "name": "fake-plan-1",
-            "id": "d3031751-XXXX-XXXX-XXXX-a42377d3320e",
+            "id": "d3031751-37f9-577c-23dw-a42377d3320e",
             "description": "Shared fake Server, 5tb persistent disk, 40 max concurrent connections.",
             "free": false,
             "metadata": {

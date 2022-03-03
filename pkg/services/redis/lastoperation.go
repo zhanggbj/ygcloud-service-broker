@@ -1,4 +1,4 @@
-package mysql
+package redis
 
 import (
 	"context"
@@ -8,13 +8,13 @@ import (
 )
 
 // LastOperation implematation
-func (m *MySqlBroker) LastOperation(ctx context.Context, instanceID string, details brokerapi.PollDetails) (brokerapi.LastOperation, error) {
+func (r *RedisBroker) LastOperation(ctx context.Context, instanceID string, details brokerapi.PollDetails) (brokerapi.LastOperation, error) {
 	// TODO: Handle different cases based on details.OperationData, like Provisioning, updating or deprovisioning
 	// OperationProvisioning || OperationUpdating
-	instance, err, serviceErr := SyncStatusWithService(m, instanceID, details.ServiceID,
+	instance, err, serviceErr := SyncStatusWithService(r, instanceID, details.ServiceID,
 		details.PlanID)
 
-	m.Logger.Debug(fmt.Sprintf("SyncStatusWithService finished"))
+	r.Logger.Debug(fmt.Sprintf("SyncStatusWithService finished"))
 	if err != nil {
 		return brokerapi.LastOperation{}, err
 	}

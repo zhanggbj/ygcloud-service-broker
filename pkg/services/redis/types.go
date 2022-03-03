@@ -1,4 +1,4 @@
-package mysql
+package redis
 
 import (
 	"encoding/json"
@@ -8,8 +8,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// DCSBroker define
-type MySqlBroker struct {
+// RedisBroker define
+type RedisBroker struct {
 	CloudCredentials config.CloudCredentials
 	Catalog          config.Catalog
 	Logger           lager.Logger
@@ -42,20 +42,6 @@ type ProvisionParameters struct {
 	HAEnable                bool                   `json:"ha_enable,omitempty" bson:"ha_enable,omitempty"`
 	HAReplicationMode       string                 `json:"ha_replicationmode,omitempty" bson:"ha_replicationmode,omitempty"`
 	UnknownFields           map[string]interface{} `json:"-" bson:",inline"`
-}
-
-// MetadataParameters represent plan metadata parameters in config
-type MetadataParameters struct {
-	DatastoreType    string `json:"datastore_type,omitempty"`
-	DatastoreVersion string `json:"datastore_version,omitempty"`
-	SpecCode         string `json:"speccode,omitempty"`
-	VolumeType       string `json:"volume_type,omitempty"`
-	VolumeSize       int    `json:"volume_size,omitempty"`
-	AvailabilityZone string `json:"availability_zone,omitempty"`
-	VPCID            string `json:"vpc_id,omitempty"`
-	SubnetID         string `json:"subnet_id,omitempty"`
-	SecurityGroupID  string `json:"security_group_id,omitempty"`
-	DatabaseUsername string `json:"database_username,omitempty"`
 }
 
 func (f *ProvisionParameters) MarshalJSON() ([]byte, error) {

@@ -1,4 +1,8 @@
 package models
 
-// MysqlServiceName for RDSMysql service name
-const MysqlServiceName = "mysql"
+const (
+	// ServiceName for Mysql service
+	MysqlServiceName = "mysql"
+	// ServiceName for Redis service
+	RedisServiceName = "redis"
+)

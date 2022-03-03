@@ -12,6 +12,7 @@ import (
 	"github.com/zhanggbj/ygcloud-service-broker/pkg/database"
 	"github.com/zhanggbj/ygcloud-service-broker/pkg/models"
 	"github.com/zhanggbj/ygcloud-service-broker/pkg/services/mysql"
+	"github.com/zhanggbj/ygcloud-service-broker/pkg/services/redis"
 )
 
 // CloudServiceBroker define
@@ -32,8 +33,14 @@ func New(logger lager.Logger, config config.Config) (*CloudServiceBroker, error)
 
 	// map service specific brokers to general broker
 	self.ServiceBrokerMap = map[string]models.ServiceBrokerProxy{
-		// DCS
+		// mysql
 		models.MysqlServiceName: &mysql.MySqlBroker{
+			CloudCredentials: self.CloudCredentials,
+			Catalog:          self.Catalog,
+			Logger:           self.Logger,
+		},
+		// redis
+		models.RedisServiceName: &redis.RedisBroker{
 			CloudCredentials: self.CloudCredentials,
 			Catalog:          self.Catalog,
 			Logger:           self.Logger,

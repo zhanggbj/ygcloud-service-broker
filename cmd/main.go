@@ -17,11 +17,13 @@ import (
 var (
 	configFilePath string
 	port           string
+	logLevel       string
 )
 
 func init() {
 	flag.StringVar(&configFilePath, "config", "config.json", "Location of Service Broker config file")
 	flag.StringVar(&port, "port", "3000", "Service Broker listen port")
+	flag.StringVar(&logLevel, "log", "DEBUG", "Service Broker log level")
 }
 
 func main() {
@@ -33,7 +35,7 @@ func main() {
 		log.Fatalf("Error loading Service Broker config file: %s", err)
 	}
 
-	logger := logger.BuildLogger(config.BrokerConfig.LogLevel)
+	logger := logger.BuildLogger(logLevel)
 
 	err = database.New(logger, config)
 	if err != nil {

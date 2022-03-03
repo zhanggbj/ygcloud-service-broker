@@ -5,6 +5,6 @@ import (
 )
 
 // Unbind implematation
-func (c *MySqlBroker) Unbind(instanceID, bindingID string, details brokerapi.UnbindDetails, asyncAllowed bool) (brokerapi.UnbindSpec, error) {
+func (m *MySqlBroker) Unbind(instanceID, bindingID string, details brokerapi.UnbindDetails, asyncAllowed bool) (brokerapi.UnbindSpec, error) {
 	return brokerapi.UnbindSpec{}, nil
 }

@@ -1,4 +1,4 @@
-package mysql
+package redis
 
 import (
 	"context"
@@ -19,10 +19,10 @@ import (
 )
 
 // Provision implematation
-func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
+func (r *RedisBroker) Provision(instanceID string, details brokerapi.ProvisionDetails, asyncAllowed bool) (brokerapi.ProvisionedServiceSpec, error) {
 	// Check accepts_incomplete if this service support async
 	if models.OperationAsyncMYSQL {
-		err := m.Catalog.ValidateAcceptsIncomplete(asyncAllowed)
+		err := r.Catalog.ValidateAcceptsIncomplete(asyncAllowed)
 		if err != nil {
 			return brokerapi.ProvisionedServiceSpec{}, err
 		}
@@ -67,24 +67,24 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 	}
 
 	// Init cloud client
-	err = m.CloudCredentials.Initial()
+	err = r.CloudCredentials.Initial()
 	if err != nil {
 		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("create dcs client failed. Error: %s", err)
 	}
 
 	// Find service
-	// service, err := m.Catalog.FindService(details.ServiceID)
+	// service, err := r.Catalog.FindService(details.ServiceID)
 	// if err != nil {
 	// 	return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("find dcs service failed. Error: %s", err)
 	// }
 
 	// // Find service plan
-	// servicePlan, err := m.Catalog.FindServicePlan(details.ServiceID, details.PlanID)
+	// servicePlan, err := p.Catalog.FindServicePlan(details.ServiceID, details.PlanID)
 	// if err != nil {
 	// 	return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("find service plan failed. Error: %s", err)
 	// }
 
-	// TODO: servicePlan.Metadata API changed, need to update
+	// TODO: Parameters is removed from servicePlan, double check if this is needed. AdditionalParameters is needed
 	// Get parameters from service plan metadata
 	// metadataParameters := MetadataParameters{}
 	// if servicePlan.Metadata != nil {
@@ -119,39 +119,32 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 		ObjectMeta: metav1.ObjectMeta{Name: instanceID},
 	}
 
-	instanceNamespace, err = m.CloudCredentials.KubeClient.CoreV1().Namespaces().Create(context.Background(), instanceNamespace, metav1.CreateOptions{})
+	instanceNamespace, err = r.CloudCredentials.KubeClient.CoreV1().Namespaces().Create(context.Background(), instanceNamespace, metav1.CreateOptions{})
 	if err != nil {
-		m.Logger.Error("Failed to create namespace", err)
+		r.Logger.Error("Failed to create namespace", err)
 		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("Provision failed. Error: %s", err)
 	}
 
-	m.Logger.Debug(fmt.Sprintf("provision parameters%v", provisionParameters))
-	values := "auth:\n" +
-		"  rootPassword: " + provisionParameters.DatabasePassword + "\n" +
-		"  database: " + provisionParameters.Name
-
-	fmt.Printf("DEBUG values %s", values)
 	chartSpec := helmClient.ChartSpec{
-		ReleaseName: fmt.Sprintf("mysql-%s", instanceID),
-		ChartName:   "https://charts.bitnami.com/bitnami/mysql-8.8.26.tgz",
+		ReleaseName: fmt.Sprintf("redis-%s", instanceID),
+		ChartName:   "https://charts.bitnami.com/bitnami/redis-16.4.5.tgz",
 		Namespace:   instanceID,
 		UpgradeCRDs: false,
 		Wait:        false,
-		ValuesYaml:  values,
 	}
 
 	// Install a chart release.
 	// Note that helmclient.Options.Namespace should ideally match the namespace in chartSpec.Namespace.
 	instance := &release.Release{}
-	if instance, err = m.CloudCredentials.ClientSet.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
-		m.Logger.Error(fmt.Sprintf("Failed to provision %s", instanceID), err)
+	if instance, err = r.CloudCredentials.ClientSet.InstallOrUpgradeChart(context.Background(), &chartSpec); err != nil {
+		r.Logger.Error(fmt.Sprintf("Failed to provision %s", instanceID), err)
 	}
 
 	// Log result
-	m.Logger.Debug(fmt.Sprintf("provision mysql instance result: %v", models.ToJson(instance.Info.Status)))
+	r.Logger.Debug(fmt.Sprintf("provision mysql instance result: %v", models.ToJson(instance.Info.Status)))
 
 	// Invoke sdk get
-	freshInstance, err := m.CloudCredentials.ClientSet.GetRelease(chartSpec.ReleaseName)
+	freshInstance, err := r.CloudCredentials.ClientSet.GetRelease(chartSpec.ReleaseName)
 	if err != nil {
 		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("get mysql instance failed. Error: %s", err)
 	}
@@ -169,7 +162,7 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 	}
 
 	// log InstanceDetails opts
-	m.Logger.Debug(fmt.Sprintf("create mysql instance in back database opts: %v", models.ToJson(idsOpts)))
+	r.Logger.Debug(fmt.Sprintf("create mysql instance in back database opts: %v", models.ToJson(idsOpts)))
 
 	err = database.BackDBConnection.Create(&idsOpts).Error
 	if err != nil {
@@ -177,10 +170,10 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 	}
 
 	// Log InstanceDetails result
-	m.Logger.Debug(fmt.Sprintf("create mysql instance in back database succeed: %s", instanceID))
+	r.Logger.Debug(fmt.Sprintf("create mysql instance in back database succeed: %s", instanceID))
 
 	// Log Provision
-	m.Logger.Debug(fmt.Sprintf("Provision finished %s", instanceID))
+	r.Logger.Debug(fmt.Sprintf("Provision finished %s", instanceID))
 
 	dashboardUrl := fmt.Sprintf("http://example.dashboard.com/mysql/%s", instanceID)
 
