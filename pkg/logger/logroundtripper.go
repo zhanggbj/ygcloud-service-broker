@@ -3,7 +3,6 @@ package logger
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -140,20 +139,20 @@ func (lrt *LogRoundTripper) formatJSON(raw []byte) string {
 // RedactHeaders processes a headers object, returning a redacted list
 func RedactHeaders(headers http.Header) (processedHeaders []string) {
 	// redactheaders Lists of headers that need to be redacted
-	var redactheaders = []string{"x-auth-token", "x-auth-key", "x-service-token",
-		"x-storage-token", "x-account-meta-temp-url-key", "x-account-meta-temp-url-key-2",
-		"x-container-meta-temp-url-key", "x-container-meta-temp-url-key-2", "set-cookie",
-		"x-subject-token"}
+	// var redactheaders = []string{"x-auth-token", "x-auth-key", "x-service-token",
+	// 	"x-storage-token", "x-account-meta-temp-url-key", "x-account-meta-temp-url-key-2",
+	// 	"x-container-meta-temp-url-key", "x-container-meta-temp-url-key-2", "set-cookie",
+	// 	"x-subject-token"}
 
-	for name, header := range headers {
-		for _, v := range header {
-			if com.IsSliceContainsStr(redactheaders, name) {
-				processedHeaders = append(processedHeaders, fmt.Sprintf("%v: %v", name, "***"))
-			} else {
-				processedHeaders = append(processedHeaders, fmt.Sprintf("%v: %v", name, v))
-			}
-		}
-	}
+	// for name, header := range headers {
+	// 	for _, v := range header {
+	// 		// if com.IsSliceContainsStr(redactheaders, name) {
+	// 		// 	processedHeaders = append(processedHeaders, fmt.Sprintf("%v: %v", name, "***"))
+	// 		// } else {
+	// 		// 	processedHeaders = append(processedHeaders, fmt.Sprintf("%v: %v", name, v))
+	// 		// }
+	// 	}
+	// }
 	return
 }
 
