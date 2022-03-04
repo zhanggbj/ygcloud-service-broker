@@ -24,21 +24,22 @@ func (m *MySqlBroker) LastOperation(ctx context.Context, instanceID string, deta
 			Description: fmt.Sprintf("get mysql instance failed. Error: %s", serviceErr),
 		}, nil
 	}
-	// Status
-	if instance.Info.Status == "deployed" {
+	// Status, ContainerCreating
+	if instance.Status.Phase == "Running" {
 		return brokerapi.LastOperation{
 			State:       brokerapi.Succeeded,
-			Description: fmt.Sprintf("Status: %s", instance.Info.Status),
+			Description: fmt.Sprintf("Status: %s", fmt.Sprintf("%v", instance.Status.Phase)),
 		}, nil
-	} else if instance.Info.Status == "failed" {
+	} else if instance.Status.Phase == "s" {
 		return brokerapi.LastOperation{
 			State:       brokerapi.Failed,
-			Description: fmt.Sprintf("Status: %s", instance.Info.Status),
+			Description: fmt.Sprintf("Status: %s", fmt.Sprintf("%v", instance.Status.Phase)),
 		}, nil
 	} else {
 		return brokerapi.LastOperation{
 			State:       brokerapi.InProgress,
-			Description: fmt.Sprintf("Status: %s", instance.Info.Status),
+			Description: fmt.Sprintf("Status: %s", fmt.Sprintf("%v", instance.Status.Phase)),
 		}, nil
 	}
 }
+ 

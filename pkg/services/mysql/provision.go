@@ -163,7 +163,7 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 	// Marshal addtional info
 	addtionalinfo, err := json.Marshal(addtionalparam)
 	if err != nil {
-		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("marshal rds addtional info failed. Error: %s", err)
+		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("marshal mysql addtional info failed. Error: %s", err)
 	}
 
 	// create InstanceDetails in back database
@@ -183,12 +183,41 @@ func (m *MySqlBroker) Provision(instanceID string, details brokerapi.ProvisionDe
 
 	err = database.BackDBConnection.Create(&idsOpts).Error
 	if err != nil {
-		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("create rds instance in back database failed. Error: %s", err)
+		return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("create mysql instance in back database failed. Error: %s", err)
 	}
 
 	// Log InstanceDetails result
 	m.Logger.Debug(fmt.Sprintf("create mysql instance in back database succeed: %s", instanceID))
 
+	// Return result
+	if asyncAllowed {
+		// OperationDatas for OperationProvisioning
+		ods := database.OperationDetails{
+			OperationType:  models.OperationProvisioning,
+			ServiceID:      details.ServiceID,
+			PlanID:         details.PlanID,
+			InstanceID:     instanceID,
+			TargetID:       instanceID,
+			TargetName:     freshInstance.Name,
+			TargetStatus:   string(freshInstance.Info.Status),
+			TargetInfo:     "k8s pod",
+			AdditionalInfo: string(addtionalinfo),
+		}
+
+		operationdata, err := ods.ToString()
+		if err != nil {
+			return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("convert mysql instance operation datas failed. Error: %s", err)
+		}
+
+		// log OperationDatas
+		m.Logger.Debug(fmt.Sprintf("create mysql instance operation datas: %s", operationdata))
+
+		// Create OperationDetails
+		err = database.BackDBConnection.Create(&ods).Error
+		if err != nil {
+			return brokerapi.ProvisionedServiceSpec{}, fmt.Errorf("create operation in back database failed. Error: %s", err)
+		}
+	}
 	// Log Provision
 	m.Logger.Debug(fmt.Sprintf("Provision finished %s", instanceID))
 
